@@ -57,6 +57,21 @@
                     'pluginPage', 
                     'rssgrab_pluginPage_section' 
                 );
+
+                add_settings_field( 
+                    'rssgrab_auto', 
+                    __( 'Turn feed into posts automatically:', 'wordpress' ), 
+                    'rssgrab_auto_render', 
+                    'pluginPage', 
+                    'rssgrab_pluginPage_section' 
+                );
+            }
+
+            function rssgrab_auto_render() { 
+                $options = get_option('rssgrab_settings');
+                ?>
+                <input type='checkbox' name='rssgrab_settings[rssgrab_auto]' <?php checked( $options['rssgrab_auto'], 0 ); ?> value='0'>
+                <?php
             }
 
             function rssgrab_feed_render() {
@@ -67,7 +82,7 @@
             }
 
             function rssgrab_settings_section_callback() {
-                echo __( 'Enter a feed to grab.', 'wordpress' );
+                echo __('Enter a feed to grab.', 'wordpress');
             }
 
             function rssgrab_options_page() {
@@ -77,8 +92,8 @@
                     <h2>RSSGrab</h2>
 
                     <?php
-                        settings_fields( 'pluginPage' );
-                        do_settings_sections( 'pluginPage' );
+                        settings_fields('pluginPage');
+                        do_settings_sections('pluginPage');
                         submit_button();
                     ?>
 
@@ -94,7 +109,7 @@
 
             // This creates the public rss feed content to place in template files.
             // Example: do_action('rssgrab_init');
-            add_action( 'rssgrab_init', 'rssgrab_public_init' );
+            add_action('rssgrab_init', 'rssgrab_public_init');
 
             function rssgrab_public_init() {
                 rssgrab_public_page();
@@ -117,6 +132,47 @@
 
         public function run() {
             $this->loader->run();
+
+            add_action('init', 'rssgrab_auto_init');
+            function rssgrab_auto_init() {
+                // If enabled.
+                $options = get_option('rssgrab_settings');
+                if (isset($options['rssgrab_auto'])) {
+                    $rss = fetch_feed($options['rssgrab_feed']);
+
+                    if (!is_wp_error($rss)) {
+                        $max = $rss->get_item_quantity(10);
+                        $items = $rss->get_items(0, $max);
+                    }
+                    if($max == 0) {
+                        return;
+                    } else foreach ($items as $item) {
+                        $args = array( 'numberposts' => '10' );
+                        $recent_posts = wp_get_recent_posts( $args );
+                        $duplicate = false;
+                        foreach ($recent_posts as $post) {
+                            $date = (string)$post['post_date'];
+                            $date = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $date)));
+                            $date2 = (string)$item->get_date();
+                            $date2 = date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $date2)));
+                            if ($date == $date2) {
+                                $duplicate = true;
+                            }
+                        }
+                        if ($duplicate == false) {
+                            $new_post = array(
+                              'post_title'    => $item->get_title(),
+                              'post_date'     => date('Y-m-d H:i:s', strtotime(str_replace('/', '-', $item->get_date()))),
+                              'post_content'  => $item->get_content(),
+                              'post_status'   => 'publish',
+                              'post_author'   => 1
+                            );
+
+                            wp_insert_post( $new_post );
+                        }
+                    }
+                }
+            }
         }
 
         public function get_plugin_name() {
