@@ -19,5 +19,3 @@ class RSSGrab_Admin {
         wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/rssgrab-admin.js', array( 'jquery' ), $this->version, false );
     }
 }
-
-?>

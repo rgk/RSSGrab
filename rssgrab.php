@@ -33,5 +33,3 @@
         $plugin->run();
     }
     run_rssgrab();
-
-?>

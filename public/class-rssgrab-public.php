@@ -19,5 +19,3 @@ class RSSGrab_Public {
         wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/rssgrab-public.js', array( 'jquery' ), $this->version, false );
     }
 }
-
-?>

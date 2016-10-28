@@ -5,5 +5,3 @@ class RSSGrab_Activator {
         // Do specific activation code here.
     }
 }
-
-?>

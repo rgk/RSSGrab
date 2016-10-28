@@ -39,5 +39,3 @@ class RSSGrab_Loader {
         }
     }
 }
-
-?>

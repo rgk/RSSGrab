@@ -30,5 +30,3 @@ if(function_exists('fetch_feed')) {
     }
     echo '</dl>';
 }
-
-?>

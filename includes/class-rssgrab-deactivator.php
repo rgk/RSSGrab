@@ -5,5 +5,3 @@ class RSSGrab_Deactivator {
         // Do specific deactivation code here.
     }
 }
-
-?>
